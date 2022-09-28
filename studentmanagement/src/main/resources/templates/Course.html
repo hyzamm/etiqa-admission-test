@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="ISO-8859-1">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <style>
+      #lblResults {
+        font-weight: bold;
+        font-size: 1.4rem;
+      }
+    </style>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+    $(document).ready(function() {
+    	getAllrecord();
+    	//alert("OK");
+    	
+    	$('#saveCourse').show();
+		$('#updateCourse').hide();
+		$('#idfield').hide();
+    	
+    	$('#saveCourse').click(function() {
+    		const obj = {coursename: $("#coursename").val(), duration: $("#duration").val()};
+			$.ajax({
+				type : "POST",
+				url : "http://localhost:8010/api/course/courses",
+				dataType : 'json',
+				contentType: "application/json",
+				data : JSON.stringify(obj),
+				/*data : {
+					stname : $("#stname").val(),
+					course : $("#course").val(),
+					fee : $("#fee").val()
+				},*/
+				success : function(result) {					
+					getAllrecord();
+					$('#courseForm')[0].reset()
+				},
+				error : function(err) {
+					alert("error is" + err)
+				}
+			});
+
+		});
+    });
+    
+          
+      var data = "";
+  	  function getAllrecord() {
+  		$
+  				.ajax({
+  					type : "GET",
+  					url : "http://localhost:8010/api/course/courses",
+  					success : function(response) {
+  						 data = response
+  						 
+  						 $('.tr').remove();
+  						for (i = 0; i < data.length; i++) {
+  							$("#courseTable")
+  									.append(
+  											'<tr class="tr"> <td>'
+  													+ data[i].id
+  													+ '</td> <td>'
+  													+ data[i].coursename
+  													+ '</td> <td>'
+  													+ data[i].duration  													
+  													+ '</td> <td><input type="button" class="btn btn-warning" onclick="editCourse('
+  													+ data[i].id
+  													+ ')"  value="Edit"></input></td> <td> <input type="button" class="btn btn-danger" onclick="deleteCourse('
+  													+ data[i].id
+  													+ ');" value="Delete"></input></td> </tr>');
+
+  						}
+
+  					},
+  					error : function(err) {
+  						alert("error is" + err)
+  					}
+  				});
+  	}
+  	
+  	//Retrive course info by ID
+  	function editCourse(id) {
+		$.ajax({
+			type : "GET",
+			url : "http://localhost:8010/api/course/courses/" + id,
+			dataType : 'json',
+			success : function(response) {
+
+				//alert("course--"+response.coursename);
+				
+				$("#id").val(response.id), 
+				$("#coursename").val(response.coursename), 
+				$("#duration").val(response.duration), 
+				
+				$('#saveCourse').hide();
+				$('#updateCourse').show();
+				$('#idfield').show();
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+  	
+  	function updateCoursebtn() {
+  		const obj = {coursename: $("#coursename").val(), duration: $("#duration").val()};
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8010/api/course/courses/" + $("#id").val(),
+			dataType : 'json',
+			contentType: "application/json",
+			data : JSON.stringify(obj),
+			/*data : {
+				id : $("#id").val(),
+				name : $("#name").val(),
+				age : $("#age").val(),
+				course : $("#course").val()
+			},*/
+			success : function(result) {
+				getAllrecord();
+
+				$('#saveCourse').show();
+				$('#updateCourse').hide();
+				$('#idfield').hide();
+				$('#courseForm')[0].reset()
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+
+	}
+  	
+  	function deleteCourse(id) {
+		$.ajax({
+			type : "DELETE",
+			url : "http://localhost:8010/api/course/courses/" + id,
+			success : function(response) {
+				getAllrecord();
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+  	
+  	function gotoHome() {
+  		window.location.href = "/index";
+	}
+  	  
+    </script>
+  </head>
+  <body>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <div class="container mt-3">
+		<form id="courseForm" name="courseForm">
+			<div class="row">
+				<div class="col-6">
+					<h3>Course Form</h3>
+
+
+					<div class="row" id="idfield">
+						<div class="col">
+							<div class="form-group">
+								<label for="id">Course ID</label> <input type="text" readonly="readonly"
+									class="form-control" id="id" name="id">
+							</div>
+						</div>
+					</div>
+
+
+					<div class="row">
+						<div class="col">
+							<div class="form-group">
+								<label for="stname">Course Name</label> <input type="text"
+									class="form-control" id="coursename" name="coursename"
+									placeholder="Enter Course Name">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col">
+							<div class="form-group">
+								<label for="course">Duration</label> <input type="text"
+									class="form-control" id="duration" name="duration"
+									placeholder="Enter Duration">
+							</div>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col">
+							<button type="button" id="saveCourse" class="btn btn-primary">Submit</button>
+							<button type="button" id="updateCourse"
+								onclick="updateCoursebtn()" class="btn btn-primary">Update</button>
+						</div>
+					</div>
+				</div>
+				<div class="col-6">
+
+					<h3>Course Record</h3>
+					
+					 <br>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">ID</th>
+								<th scope="col">Course Name</th>
+								<th scope="col">Duration</th>								
+								<th scope="col">Edit</th>
+								<th scope="col">Delete</th>
+							</tr>
+						</thead>
+						<tbody id="courseTable">
+						
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+							<button type="button" id=home class="btn btn-dark" onclick="gotoHome()">Home</button>							
+				</div>
+			</div>
+		</form>
+	</div>
+  </body>
+</html>
